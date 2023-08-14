@@ -7,7 +7,7 @@ colnames(countdata) <- gsub("\\.[sb]am$", "", colnames(countdata))
 countdata <- as.matrix(countdata)
 head(countdata)
 
-(condition <- factor(c(rep("ctl", 5), rep("dis", 5))))
+(condition <- factor(c(rep("ctl", 74), rep("dis", 74))))
 
 # Analysis with DESeq2 ----------------------------------------------------
 
@@ -44,9 +44,6 @@ heatmap.2(as.matrix(sampleDists), key=F, trace="none",
           ColSideColors=mycols[condition], RowSideColors=mycols[condition],
           margin=c(10, 10), main="Sample Distance Matrix")
 dev.off()
-
-###################Heatmap##############
-
 library("pheatmap")
 select <- order(rowMeans(counts(dds,normalized=TRUE)),
                 decreasing=TRUE)[1:100]
@@ -87,9 +84,7 @@ rld_pca <- function (rld, intgroup = "condition", ntop = 500, colors=NULL, legen
 png("qc-pca.png", 1000, 1000, pointsize=20)
 rld_pca(rld, colors=mycols, intgroup="condition", xlim=c(-75, 35))
 dev.off()
-
-
-# Get differential expression results
+# Differential expression results
 res <- results(dds)
 table(res$padj<0.05)
 ## Order by adjusted p-value
@@ -108,10 +103,7 @@ hist(res$pvalue, breaks=50, col="grey")
 attr(res, "filterThreshold")
 plot(attr(res,"filterNumRej"), type="b", xlab="quantiles of baseMean", ylab="number of rejections")
 
-## MA plot
-## Could do with built-in DESeq2 function:
-## DESeq2::plotMA(dds, ylim=c(-1,1), cex=1)
-## I like mine better:
+## MA plot with lables
 maplot <- function (res, thresh=0.05, labelsig=FALSE, textcx=1, ...) {
   with(res, plot(baseMean, log2FoldChange, pch=20, cex=.5, log="x", ...))
   with(subset(res, padj<thresh), points(baseMean, log2FoldChange, col="red", pch=20, cex=1.5))
